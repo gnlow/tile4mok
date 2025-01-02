@@ -18,7 +18,7 @@ render(html`
             display: flex;
             flex-direction: column;
             --black: oklch(30% 0.01 55);
-            --white: oklch(96% 0.02 55);
+            --white: oklch(96% 0.01 55);
         }
         h1 {
             font-size: 64px;

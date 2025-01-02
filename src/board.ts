@@ -21,7 +21,7 @@ export const Board = html`
         grid: repeat(6, 1fr) / repeat(6, 1fr);
         grid-gap: 5px;
 
-        border-radius: 15px;
+        border-radius: 18px;
     }
 </style>
 <Board>
@@ -32,13 +32,14 @@ export const Board = html`
             height: 100%;
             aspect-ratio: 1;
 
-            border-radius: 5px;
+            border-radius: 8px;
         }
         Tile[state="0"] {
             background: var(--black);
         }
         Tile[state="1"] {
             background: var(--white);
+            border: 5px solid var(--black);
         }
     </style>
     ${boardState.flatMap((row, rowI) => row.map((state, colI) => html`<Tile
