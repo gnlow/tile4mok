@@ -1,4 +1,5 @@
-import { html, render } from "https://esm.sh/lit-html@3.2.1"
+import { html, render } from "./deps.ts"
+import { Board } from "./board.ts"
 
 const app = document.querySelector("body")!
 const shadow = app.attachShadow({ mode: "open" })
@@ -12,14 +13,20 @@ render(html`
         }
         :host {
             padding: 30px;
-            background: oklch(96% 0.02 55);
-            color: oklch(30% 0.01 55)
+            background: var(--white);
+            color: var(--black);
+            display: flex;
+            flex-direction: column;
+            --black: oklch(30% 0.01 55);
+            --white: oklch(96% 0.02 55);
         }
         h1 {
             font-size: 64px;
             font-weight: 700;
             letter-spacing: -0.05em;
+            color: var(--black);
         }
     </style>
     <h1>Tile4mok</h1>
+    ${Board}
 `, shadow)
