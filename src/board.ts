@@ -43,9 +43,9 @@ export const Board = html`
         }
     </style>
     ${boardState.flatMap((row, rowI) => row.map((state, colI) => html`<Tile
-        state="${state}"
-        col="${colI}"
-        row="${rowI}"
+        state=${state}
+        col=${colI}
+        row=${rowI}
         style="
             grid-column: ${colI + 2};
             grid-row: ${rowI + 2};
