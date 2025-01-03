@@ -2,7 +2,7 @@ import { html, render } from "./deps.ts"
 import { Board } from "./board.ts"
 
 const app = document.querySelector("body")!
-const shadow = app.attachShadow({ mode: "open" })
+export const $root = app.attachShadow({ mode: "open" })
 
 render(html`
     <style>
@@ -29,4 +29,4 @@ render(html`
     </style>
     <h1>Tile4mok</h1>
     ${Board}
-`, shadow)
+`, $root)

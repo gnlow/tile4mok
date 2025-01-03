@@ -1,4 +1,5 @@
 import { html } from "./deps.ts"
+import { $root } from "./index.ts"
 
 const boardState = `
     0101
@@ -28,6 +29,7 @@ export const Board = html`
     <style>
         Tile {
             display: block;
+            position: relative;
             width: 100%;
             height: 100%;
             aspect-ratio: 1;
@@ -42,14 +44,36 @@ export const Board = html`
             border: 5px solid var(--black);
         }
     </style>
-    ${boardState.flatMap((row, rowI) => row.map((state, colI) => html`<Tile
-        state=${state}
-        col=${colI}
-        row=${rowI}
-        style="
-            grid-column: ${colI + 2};
-            grid-row: ${rowI + 2};
-        "
-    />`))}
+    ${boardState.flatMap((row, rowI) => row.map((state, colI) => {
+        let startX = 0
+        let startY = 0
+        let x = 0
+        let y = 0
+
+        let $el: HTMLElement
+        const onMove = (e: Event) => {
+            if (!(e instanceof MouseEvent)) { throw 0 }
+            $el.style.left = (x = e.pageX - startX) + "px"
+            $el.style.top = (y = e.pageY - startY) + "px"
+        }
+        return html`<Tile
+            state=${state}
+            col=${colI}
+            row=${rowI}
+            style="
+                grid-column: ${colI + 2};
+                grid-row: ${rowI + 2};
+            "
+            @mousedown=${(e: MouseEvent) => {
+                $el = e.target as HTMLElement
+                startX = e.pageX - x
+                startY = e.pageY - y
+                $root.addEventListener("mousemove", onMove)
+            }}
+            @mouseup=${(e: MouseEvent) => {
+                $root.removeEventListener("mousemove", onMove)
+            }}
+        />`
+    }))}
 </Board>
 `
