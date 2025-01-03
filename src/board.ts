@@ -126,7 +126,8 @@ return html`
                 }, { once: true })
                 moving = true
 
-                while (moving || Math.hypot(x - renderedX, y - renderedY) > 0.01) {
+                while (moving || Math.hypot(Math.round(x / 140) * 140 - renderedX, Math.round(y / 140) * 140 - renderedY) > 0.01) {
+                    console.log((boardY / 70) * 70)
                     await tick()
                     $el.style.left = (renderedX += (Math.round(x / 140) * 140 - renderedX) * 0.1) + "px"
                     $el.style.top = (renderedY += (Math.round(y / 140) * 140 - renderedY) * 0.1) + "px"
