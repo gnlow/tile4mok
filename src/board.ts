@@ -128,11 +128,11 @@ return html`
 
                 while (moving || Math.hypot(x - renderedX, y - renderedY) > 0.01) {
                     await tick()
-                    $el.style.left = (renderedX += (x - renderedX) * 0.2) + "px"
-                    $el.style.top = (renderedY += (y - renderedY) * 0.2) + "px"
+                    $el.style.left = (renderedX += (Math.round(x / 140) * 140 - renderedX) * 0.2) + "px"
+                    $el.style.top = (renderedY += (Math.round(y / 140) * 140 - renderedY) * 0.2) + "px"
                     $el.innerText = renderedX.toFixed(1) + ", " + renderedY.toFixed(1)
-                    $board.style.left = (boardRenderedX += (boardX - boardRenderedX) * 0.2) + "px"
-                    $board.style.top = (boardRenderedY += (boardY - boardRenderedY) * 0.2) + "px"
+                    $board.style.left = (boardRenderedX += (Math.round(boardX / 70) * 70 - boardRenderedX) * 0.2) + "px"
+                    $board.style.top = (boardRenderedY += (Math.round(boardY / 70) * 70 - boardRenderedY) * 0.2) + "px"
                 }
             }}
         />`
