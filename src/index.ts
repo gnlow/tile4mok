@@ -28,5 +28,5 @@ render(html`
         }
     </style>
     <h1>Tile4mok</h1>
-    ${Board}
+    ${Board()}
 `, $root)

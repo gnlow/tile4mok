@@ -12,38 +12,47 @@ const boardState = `
     .split("\n")
     .map(line => line.trim().split("").map(Number))
 
-export const Board = html`
+export const Board = () => {
+return html`
 <style>
-    Board {
+    BoardOut {
         width: 100%;
         border: 5px solid var(--black);
         padding: 5px;
 
+        border-radius: 18px;
+
+        overflow: hidden;
+    }
+    BoardIn {
+        position: relative;
+        width: 100%;
+        border: 2px solid var(--black);
+
         display: grid;
         grid: repeat(6, 1fr) / repeat(6, 1fr);
         grid-gap: 5px;
+    }
+    Tile {
+        display: block;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        aspect-ratio: 1;
 
-        border-radius: 18px;
+        border-radius: 8px;
+    }
+    Tile[state="0"] {
+        background: var(--black);
+    }
+    Tile[state="1"] {
+        background: var(--white);
+        border: 5px solid var(--black);
     }
 </style>
-<Board>
+<BoardOut>
+<BoardIn>
     <style>
-        Tile {
-            display: block;
-            position: relative;
-            width: 100%;
-            height: 100%;
-            aspect-ratio: 1;
-
-            border-radius: 8px;
-        }
-        Tile[state="0"] {
-            background: var(--black);
-        }
-        Tile[state="1"] {
-            background: var(--white);
-            border: 5px solid var(--black);
-        }
     </style>
     ${boardState.flatMap((row, rowI) => row.map((state, colI) => {
         let startX = 0
@@ -69,6 +78,7 @@ export const Board = html`
                 grid-row: ${rowI + 2};
             "
             @mousedown=${async (e: MouseEvent) => {
+                const $board = $root.querySelector("BoardIn")! as HTMLElement
                 $el = e.target as HTMLElement
                 startX = e.pageX - x
                 startY = e.pageY - y
@@ -79,15 +89,17 @@ export const Board = html`
                 })
                 moving = true
 
-                while (moving || Math.hypot(x - renderedX, y - renderedY) > 0.1) {
+                while (moving || Math.hypot(x - renderedX, y - renderedY) > 0.01) {
                     await tick()
-                    $el.style.left = (renderedX += (x - renderedX) * 0.2) + "px"
-                    $el.style.top = (renderedY += (y - renderedY) * 0.2) + "px"
+                    $el.style.left = (renderedX += (x - renderedX) * 0.2) * 1.5 + "px"
+                    $el.style.top = (renderedY += (y - renderedY) * 0.2) * 1.5 + "px"
+                    $board.style.left = -renderedX * 0.5 + "px"
+                    $board.style.top = -renderedY * 0.5 + "px"
                 }
-                $el.style.left = x + "px"
-                $el.style.top = y + "px"
             }}
         />`
     }))}
-</Board>
+</BoardIn>
+</BoardOut>
 `
+}
