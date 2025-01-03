@@ -13,6 +13,12 @@ const boardState = `
     .map(line => line.trim().split("").map(Number))
 
 export const Board = () => {
+
+const state = boardState
+
+const width = 4
+const height = 4
+
 let boardStartX = 0
 let boardStartY = 0
 let boardX = 0
@@ -39,46 +45,55 @@ return html`
         border-radius: 11px;
 
         display: grid;
-        grid: repeat(6, 1fr) / repeat(6, 1fr);
+        grid: repeat(6, 135px) / repeat(6, 135px);
         grid-gap: 5px;
     }
     Tile {
         display: block;
-        position: relative;
-        width: 100%;
-        height: 100%;
+        position: absolute;
+        width: 135px;
+        height: 135px;
         aspect-ratio: 1;
 
         border-radius: 8px;
     }
     Tile[state="0"] {
         background: var(--black);
+        
+        color: var(--white);
     }
     Tile[state="1"] {
         background: var(--white);
         border: 5px solid var(--black);
+
+        color: var(--black);
     }
 </style>
 <BoardOut>
 <BoardIn>
-    ${boardState.flatMap((row, rowI) => row.map((state, colI) => {
+    ${state.flatMap((row, rowI) => row.map((state, colI) => {
         let startPageX = 0
         let startPageY = 0
         let startX = 0
         let startY = 0
-        let x = 0
-        let y = 0
-        let renderedX = 0
-        let renderedY = 0
+        let x = (colI + 1) * 140
+        let y = (rowI + 1) * 140
+        let renderedX = x
+        let renderedY = y
         let moving = false
+
+        const stair =
+        (a: number, b: number) =>
+        (n: number) =>
+            Math.max(Math.min(n-a, 0), n-b)
 
         let $el: HTMLElement
         const onMove = (e: Event) => {
             if (!(e instanceof MouseEvent)) { throw 0 }
             const dPageX = e.pageX - startPageX
             const dPageY = e.pageY - startPageY
-            boardX = boardStartX - dPageX * 2
-            boardY = boardStartY - dPageY
+            boardX = stair(140, 560)(x) * -0.5
+            boardY = stair(140, 560)(y) * -0.5
             const dBoardX = boardX - boardStartX
             const dBoardY = boardY - boardStartY
             x = startX + dPageX - dBoardX
@@ -89,11 +104,12 @@ return html`
             col=${colI}
             row=${rowI}
             style="
-                grid-column: ${colI + 2};
-                grid-row: ${rowI + 2};
+                left: ${x}px;
+                top: ${y}px;
             "
             @mousedown=${async (e: MouseEvent) => {
                 console.log("mousedown", x, y)
+                console.log("dimension", width, height)
                 const $board = $root.querySelector("BoardIn")! as HTMLElement
                 $el = e.target as HTMLElement
                 startPageX = e.pageX
@@ -114,6 +130,7 @@ return html`
                     await tick()
                     $el.style.left = (renderedX += (x - renderedX) * 0.2) + "px"
                     $el.style.top = (renderedY += (y - renderedY) * 0.2) + "px"
+                    $el.innerText = renderedX.toFixed(1) + ", " + renderedY.toFixed(1)
                     $board.style.left = (boardRenderedX += (boardX - boardRenderedX) * 0.2) + "px"
                     $board.style.top = (boardRenderedY += (boardY - boardRenderedY) * 0.2) + "px"
                 }
