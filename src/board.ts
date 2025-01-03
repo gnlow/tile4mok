@@ -1,5 +1,6 @@
 import { html } from "./deps.ts"
 import { $root } from "./index.ts"
+import { tick } from "./util.ts"
 
 const boardState = `
     0101
@@ -49,12 +50,15 @@ export const Board = html`
         let startY = 0
         let x = 0
         let y = 0
+        let renderedX = 0
+        let renderedY = 0
+        let moving = false
 
         let $el: HTMLElement
         const onMove = (e: Event) => {
             if (!(e instanceof MouseEvent)) { throw 0 }
-            $el.style.left = (x = e.pageX - startX) + "px"
-            $el.style.top = (y = e.pageY - startY) + "px"
+            x = e.pageX - startX
+            y = e.pageY - startY
         }
         return html`<Tile
             state=${state}
@@ -64,14 +68,24 @@ export const Board = html`
                 grid-column: ${colI + 2};
                 grid-row: ${rowI + 2};
             "
-            @mousedown=${(e: MouseEvent) => {
+            @mousedown=${async (e: MouseEvent) => {
                 $el = e.target as HTMLElement
                 startX = e.pageX - x
                 startY = e.pageY - y
                 $root.addEventListener("mousemove", onMove)
-            }}
-            @mouseup=${(e: MouseEvent) => {
-                $root.removeEventListener("mousemove", onMove)
+                $root.addEventListener("mouseup", () => {
+                    $root.removeEventListener("mousemove", onMove)
+                    moving = false
+                })
+                moving = true
+
+                while (moving || Math.hypot(x - renderedX, y - renderedY) > 0.1) {
+                    await tick()
+                    $el.style.left = (renderedX += (x - renderedX) * 0.2) + "px"
+                    $el.style.top = (renderedY += (y - renderedY) * 0.2) + "px"
+                }
+                $el.style.left = x + "px"
+                $el.style.top = y + "px"
             }}
         />`
     }))}
