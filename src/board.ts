@@ -29,6 +29,8 @@ return html`
         width: 100%;
         border: 2px solid var(--black);
 
+        border-radius: 11px;
+
         display: grid;
         grid: repeat(6, 1fr) / repeat(6, 1fr);
         grid-gap: 5px;
@@ -52,8 +54,6 @@ return html`
 </style>
 <BoardOut>
 <BoardIn>
-    <style>
-    </style>
     ${boardState.flatMap((row, rowI) => row.map((state, colI) => {
         let startX = 0
         let startY = 0
