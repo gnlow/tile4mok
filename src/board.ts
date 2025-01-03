@@ -83,17 +83,17 @@ return html`
         let moving = false
 
         const stair =
-        (a: number, b: number) =>
+        (a: number, b: number, c: number, d: number) =>
         (n: number) =>
-            Math.max(Math.min(n-a, 0), n-b)
+            Math.max(a-b, Math.min(Math.max(Math.min(n-b, 0), n-c), d-c))
 
         let $el: HTMLElement
         const onMove = (e: Event) => {
             if (!(e instanceof MouseEvent)) { throw 0 }
             const dPageX = e.pageX - startPageX
             const dPageY = e.pageY - startPageY
-            boardX = stair(140, 560)(x) * -0.5
-            boardY = stair(140, 560)(y) * -0.5
+            boardX = stair(0, 140, 560, 700)(x) * -0.5
+            boardY = stair(0, 140, 560, 700)(y) * -0.5
             const dBoardX = boardX - boardStartX
             const dBoardY = boardY - boardStartY
             x = startX + dPageX - dBoardX
@@ -128,11 +128,10 @@ return html`
 
                 while (moving || Math.hypot(x - renderedX, y - renderedY) > 0.01) {
                     await tick()
-                    $el.style.left = (renderedX += (Math.round(x / 140) * 140 - renderedX) * 0.2) + "px"
-                    $el.style.top = (renderedY += (Math.round(y / 140) * 140 - renderedY) * 0.2) + "px"
-                    $el.innerText = renderedX.toFixed(1) + ", " + renderedY.toFixed(1)
-                    $board.style.left = (boardRenderedX += (Math.round(boardX / 70) * 70 - boardRenderedX) * 0.2) + "px"
-                    $board.style.top = (boardRenderedY += (Math.round(boardY / 70) * 70 - boardRenderedY) * 0.2) + "px"
+                    $el.style.left = (renderedX += (Math.round(x / 140) * 140 - renderedX) * 0.1) + "px"
+                    $el.style.top = (renderedY += (Math.round(y / 140) * 140 - renderedY) * 0.1) + "px"
+                    $board.style.left = (boardRenderedX += (Math.round(boardX / 70) * 70 - boardRenderedX) * 0.1) + "px"
+                    $board.style.top = (boardRenderedY += (Math.round(boardY / 70) * 70 - boardRenderedY) * 0.1) + "px"
                 }
             }}
         />`
