@@ -27,6 +27,6 @@ render(html`
             color: var(--black);
         }
     </style>
-    <h1>Tile4mok</h1>
+    <h1>Drag Demo</h1>
     ${Board()}
 `, $root)
