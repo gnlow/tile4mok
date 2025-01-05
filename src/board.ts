@@ -81,10 +81,14 @@ return html`
         let renderedY = y
         let moving = false
 
+        const clip =
+        (a: number, b: number, c: number) =>
+            Math.max(a, Math.min(b, c))
+
         const stair =
         (a: number, b: number, c: number, d: number) =>
         (n: number) =>
-            Math.max(a-b, Math.min(Math.max(Math.min(n-b, 0), n-c), d-c))
+            clip(a-b, clip(n-c, 0, n-b), d-c)
         
         const snap =
         (step: number) =>
@@ -100,8 +104,8 @@ return html`
             boardY = snap(70)(stair(0, 140, 560, 700)(y) * -0.5)
             const dBoardX = boardX - boardStartX
             const dBoardY = boardY - boardStartY
-            x = snap(140)(startX + dPageX - dBoardX)
-            y = snap(140)(startY + dPageY - dBoardY)
+            x = clip(0, snap(140)(startX + dPageX - dBoardX), 700)
+            y = clip(0, snap(140)(startY + dPageY - dBoardY), 700)
         }
         return html`<Tile
             state=${state}
