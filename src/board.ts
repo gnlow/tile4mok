@@ -18,6 +18,9 @@ let boardX = 0
 let boardY = 0
 let boardRenderedX = 0
 let boardRenderedY = 0
+const boardUnit = 140
+let scale = 1
+let renderedScale = scale
 
 return html`
 <style>
@@ -69,8 +72,8 @@ return html`
         let startPageY = 0
         let startX = 0
         let startY = 0
-        let x = (col + 1) * 140
-        let y = (row + 1) * 140
+        let x = (col + 1) * boardUnit
+        let y = (row + 1) * boardUnit
         let renderedX = x
         let renderedY = y
         let moving = false
@@ -92,17 +95,27 @@ return html`
         let $el: HTMLElement
         const onMove = (e: Event) => {
             if (!(e instanceof MouseEvent)) { throw 0 }
-            const dPageX = e.pageX - startPageX
-            const dPageY = e.pageY - startPageY
+            const dPageX = (e.pageX - startPageX) / scale
+            const dPageY = (e.pageY - startPageY) / scale
             const [x0, x1] = boardState.dimension.col
             const [y0, y1] = boardState.dimension.row
-            boardX = snap(70)(stair(x0, x0+1, x1+1, x1+2)(x/140)*140 * -0.5) - ((x0+x1)/2 - 1.5)*140
-            boardY = snap(70)(stair(y0, y0+1, y1+1, y1+2)(y/140)*140 * -0.5) - ((y0+y1)/2 - 1.5)*140
-            console.log("board", x0, "/", x0+1, "-", x1+1, "/", x1+2, "[", x/140, "] ->", boardX / 140)
+
+            const $boardOut = $root.querySelector("BoardOut")! as HTMLElement
+            const boardWidth = $boardOut.clientWidth
+            const boardHeight = $boardOut.clientHeight
+            
+            scale = Math.min(
+                boardWidth/(boardState.width+2),
+                boardHeight/(boardState.height+2),
+            ) / boardUnit
+
+            boardX = snap(boardUnit/2)(stair(x0, x0+1, x1+1, x1+2)(x/boardUnit)*boardUnit * -0.5) - ((x0+x1)/2 - 1.5)*boardUnit
+            boardY = snap(boardUnit/2)(stair(y0, y0+1, y1+1, y1+2)(y/boardUnit)*boardUnit * -0.5) - ((y0+y1)/2 - 1.5)*boardUnit
+
             const dBoardX = boardX - boardStartX
             const dBoardY = boardY - boardStartY
-            x = clip(x0*140, snap(140)(startX + dPageX - dBoardX), (x1+2)*140)
-            y = clip(y0*140, snap(140)(startY + dPageY - dBoardY), (y1+2)*140)
+            x = clip(x0*boardUnit, snap(boardUnit)(startX + dPageX - dBoardX), (x1+2)*boardUnit)
+            y = clip(y0*boardUnit, snap(boardUnit)(startY + dPageY - dBoardY), (y1+2)*boardUnit)
         }
         return html`<Tile
             state=${state}
@@ -130,7 +143,7 @@ return html`
                     $el.style.zIndex = "0"
                     boardState.swap(
                         [tile.col, tile.row],
-                        [Math.round(x / 140)-1, Math.round(y / 140)-1],
+                        [Math.round(x / boardUnit)-1, Math.round(y / boardUnit)-1],
                     )
                     console.log(boardState.toBoxString())
                 }, { once: true })
@@ -144,6 +157,7 @@ return html`
                     $el.style.top = (renderedY += (y - renderedY) * 0.1) + "px"
                     $board.style.left = (boardRenderedX += (boardX - boardRenderedX) * 0.1) + "px"
                     $board.style.top = (boardRenderedY += (boardY - boardRenderedY) * 0.1) + "px"
+                    $board.style.transform = `scale(${renderedScale += (scale - renderedScale) * 0.1})`
                 }
             }}
         />`
