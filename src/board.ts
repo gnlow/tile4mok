@@ -94,12 +94,15 @@ return html`
             if (!(e instanceof MouseEvent)) { throw 0 }
             const dPageX = e.pageX - startPageX
             const dPageY = e.pageY - startPageY
-            boardX = snap(70)(stair(0, 140, 560, 700)(x) * -0.5)
-            boardY = snap(70)(stair(0, 140, 560, 700)(y) * -0.5)
+            const [x0, x1] = boardState.dimension.col
+            const [y0, y1] = boardState.dimension.row
+            boardX = snap(70)(stair(x0, x0+1, x1+1, x1+2)(x/140)*140 * -0.5) - ((x0+x1)/2 - 1.5)*140
+            boardY = snap(70)(stair(y0, y0+1, y1+1, y1+2)(y/140)*140 * -0.5) - ((y0+y1)/2 - 1.5)*140
+            console.log("board", x0, "/", x0+1, "-", x1+1, "/", x1+2, "[", x/140, "] ->", boardX / 140)
             const dBoardX = boardX - boardStartX
             const dBoardY = boardY - boardStartY
-            x = clip(0, snap(140)(startX + dPageX - dBoardX), 700)
-            y = clip(0, snap(140)(startY + dPageY - dBoardY), 700)
+            x = clip(x0*140, snap(140)(startX + dPageX - dBoardX), (x1+2)*140)
+            y = clip(y0*140, snap(140)(startY + dPageY - dBoardY), (y1+2)*140)
         }
         return html`<Tile
             state=${state}
@@ -108,6 +111,7 @@ return html`
                 top: ${y}px;
             "
             @mousedown=${async (e: MouseEvent) => {
+                e.preventDefault()
                 console.log("mousedown", x, y)
                 console.log("dimension", boardState.width, boardState.height)
                 const $board = $root.querySelector("BoardIn")! as HTMLElement
