@@ -85,18 +85,23 @@ return html`
         (a: number, b: number, c: number, d: number) =>
         (n: number) =>
             Math.max(a-b, Math.min(Math.max(Math.min(n-b, 0), n-c), d-c))
+        
+        const snap =
+        (step: number) =>
+        (n: number) =>
+            Math.round(n / step) * step
 
         let $el: HTMLElement
         const onMove = (e: Event) => {
             if (!(e instanceof MouseEvent)) { throw 0 }
             const dPageX = e.pageX - startPageX
             const dPageY = e.pageY - startPageY
-            boardX = stair(0, 140, 560, 700)(x) * -0.5
-            boardY = stair(0, 140, 560, 700)(y) * -0.5
+            boardX = snap(70)(stair(0, 140, 560, 700)(x) * -0.5)
+            boardY = snap(70)(stair(0, 140, 560, 700)(y) * -0.5)
             const dBoardX = boardX - boardStartX
             const dBoardY = boardY - boardStartY
-            x = startX + dPageX - dBoardX
-            y = startY + dPageY - dBoardY
+            x = snap(140)(startX + dPageX - dBoardX)
+            y = snap(140)(startY + dPageY - dBoardY)
         }
         return html`<Tile
             state=${state}
@@ -128,12 +133,12 @@ return html`
 
                 $el.style.zIndex = "1"
 
-                while (moving || Math.hypot(Math.round(x / 140) * 140 - renderedX, Math.round(y / 140) * 140 - renderedY) > 0.01) {
+                while (moving || Math.hypot(x - renderedX, y - renderedY) > 0.01) {
                     await tick()
-                    $el.style.left = (renderedX += (Math.round(x / 140) * 140 - renderedX) * 0.1) + "px"
-                    $el.style.top = (renderedY += (Math.round(y / 140) * 140 - renderedY) * 0.1) + "px"
-                    $board.style.left = (boardRenderedX += (Math.round(boardX / 70) * 70 - boardRenderedX) * 0.1) + "px"
-                    $board.style.top = (boardRenderedY += (Math.round(boardY / 70) * 70 - boardRenderedY) * 0.1) + "px"
+                    $el.style.left = (renderedX += (x - renderedX) * 0.1) + "px"
+                    $el.style.top = (renderedY += (y - renderedY) * 0.1) + "px"
+                    $board.style.left = (boardRenderedX += (boardX - boardRenderedX) * 0.1) + "px"
+                    $board.style.top = (boardRenderedY += (boardY - boardRenderedY) * 0.1) + "px"
                 }
             }}
         />`
