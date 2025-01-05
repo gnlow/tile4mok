@@ -21,7 +21,7 @@ export interface Dimension {
 }
 
 export class BoardState {
-    private tiles: Tile[] = []
+    readonly tiles: Tile[] = []
     private map: Map<string, Tile> = new Map
 
     constructor(data: (State | undefined)[][]) {

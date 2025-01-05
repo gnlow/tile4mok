@@ -1,23 +1,16 @@
 import { html } from "./deps.ts"
 import { $root } from "./index.ts"
 import { tick } from "./util.ts"
-
-const boardState = `
-    0101
-    0101
-    1010
-    1010
-`
-    .trim()
-    .split("\n")
-    .map(line => line.trim().split("").map(Number))
+import { BoardState } from "./BoardState.ts"
 
 export const Board = () => {
 
-const state = boardState
-
-const width = 4
-const height = 4
+const boardState = BoardState.fromString(`
+    0101
+    0101
+    1010
+    1010
+`)
 
 let boardStartX = 0
 let boardStartY = 0
@@ -70,13 +63,14 @@ return html`
 </style>
 <BoardOut>
 <BoardIn>
-    ${state.flatMap((row, rowI) => row.map((state, colI) => {
+    ${boardState.tiles.map(tile => {
+        const { state, col, row } = tile
         let startPageX = 0
         let startPageY = 0
         let startX = 0
         let startY = 0
-        let x = (colI + 1) * 140
-        let y = (rowI + 1) * 140
+        let x = (col + 1) * 140
+        let y = (row + 1) * 140
         let renderedX = x
         let renderedY = y
         let moving = false
@@ -109,15 +103,13 @@ return html`
         }
         return html`<Tile
             state=${state}
-            col=${colI}
-            row=${rowI}
             style="
                 left: ${x}px;
                 top: ${y}px;
             "
             @mousedown=${async (e: MouseEvent) => {
                 console.log("mousedown", x, y)
-                console.log("dimension", width, height)
+                console.log("dimension", boardState.width, boardState.height)
                 const $board = $root.querySelector("BoardIn")! as HTMLElement
                 $el = e.target as HTMLElement
                 startPageX = e.pageX
@@ -132,6 +124,11 @@ return html`
                     $root.removeEventListener("mousemove", onMove)
                     moving = false
                     $el.style.zIndex = "0"
+                    boardState.swap(
+                        [tile.col, tile.row],
+                        [Math.round(x / 140)-1, Math.round(y / 140)-1],
+                    )
+                    console.log(boardState.toBoxString())
                 }, { once: true })
                 moving = true
 
@@ -146,7 +143,7 @@ return html`
                 }
             }}
         />`
-    }))}
+    })}
 </BoardIn>
 </BoardOut>
 `
