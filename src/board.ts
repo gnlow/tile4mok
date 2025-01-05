@@ -22,12 +22,29 @@ const boardUnit = 140
 let scale = 1
 let renderedScale = scale
 
+const updateScale = () => {
+    const $boardOut = $root.querySelector("BoardOut")! as HTMLElement
+    const boardWidth = $boardOut.clientWidth
+    const boardHeight = $boardOut.clientHeight
+    
+    scale = Math.min(
+        boardWidth/(boardState.width+2),
+        boardHeight/(boardState.height+2),
+    ) / boardUnit
+}
+addEventListener("DOMContentLoaded", updateScale)
+
 return html`
 <style>
     BoardOut {
         width: 100%;
+        height: 100%;
         border: 5px solid var(--black);
         padding: 5px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
         border-radius: 18px;
 
@@ -35,13 +52,10 @@ return html`
     }
     BoardIn {
         position: relative;
-        width: 100%;
+        width: 555px;
+        height: 555px;
 
         border-radius: 11px;
-
-        display: grid;
-        grid: repeat(6, 135px) / repeat(6, 135px);
-        grid-gap: 5px;
     }
     Tile {
         display: block;
@@ -66,14 +80,14 @@ return html`
 </style>
 <BoardOut>
 <BoardIn>
-    ${boardState.tiles.map(tile => {
+    ${boardState.tiles.map((tile, i) => {
         const { state, col, row } = tile
         let startPageX = 0
         let startPageY = 0
         let startX = 0
         let startY = 0
-        let x = (col + 1) * boardUnit
-        let y = (row + 1) * boardUnit
+        let x = col * boardUnit
+        let y = row * boardUnit
         let renderedX = x
         let renderedY = y
         let moving = false
@@ -93,6 +107,21 @@ return html`
             Math.round(n / step) * step
 
         let $el: HTMLElement
+
+        const render = ($el: HTMLElement, $board: HTMLElement) => {
+            $el.style.left = (renderedX += (x - renderedX) * 0.1) + "px"
+            $el.style.top = (renderedY += (y - renderedY) * 0.1) + "px"
+            
+            $board.style.transform = `scale(${renderedScale += (scale - renderedScale) * 0.1})`
+            $board.style.left = (boardRenderedX += (boardX - boardRenderedX) * 0.1) * scale + "px"
+            $board.style.top = (boardRenderedY += (boardY - boardRenderedY) * 0.1) * scale + "px"
+        }
+        addEventListener("DOMContentLoaded", () => {
+            render(
+                $root.querySelector(`tile:nth-child(${i+1})`)!,
+                $root.querySelector("boardin")!,
+            )
+        })
         const onMove = (e: Event) => {
             if (!(e instanceof MouseEvent)) { throw 0 }
             const dPageX = (e.pageX - startPageX) / scale
@@ -100,22 +129,15 @@ return html`
             const [x0, x1] = boardState.dimension.col
             const [y0, y1] = boardState.dimension.row
 
-            const $boardOut = $root.querySelector("BoardOut")! as HTMLElement
-            const boardWidth = $boardOut.clientWidth
-            const boardHeight = $boardOut.clientHeight
-            
-            scale = Math.min(
-                boardWidth/(boardState.width+2),
-                boardHeight/(boardState.height+2),
-            ) / boardUnit
+            updateScale()
 
-            boardX = snap(boardUnit/2)(stair(x0, x0+1, x1+1, x1+2)(x/boardUnit)*boardUnit * -0.5) - ((x0+x1)/2 - 1.5)*boardUnit
-            boardY = snap(boardUnit/2)(stair(y0, y0+1, y1+1, y1+2)(y/boardUnit)*boardUnit * -0.5) - ((y0+y1)/2 - 1.5)*boardUnit
+            boardX = snap(boardUnit/2)(stair(x0-1, x0, x1, x1+1)(x/boardUnit)*boardUnit * -0.5) - ((x0+x1)/2 - 1.5)*boardUnit
+            boardY = snap(boardUnit/2)(stair(y0-1, y0, y1, y1+1)(y/boardUnit)*boardUnit * -0.5) - ((y0+y1)/2 - 1.5)*boardUnit
 
             const dBoardX = boardX - boardStartX
             const dBoardY = boardY - boardStartY
-            x = clip(x0*boardUnit, snap(boardUnit)(startX + dPageX - dBoardX), (x1+2)*boardUnit)
-            y = clip(y0*boardUnit, snap(boardUnit)(startY + dPageY - dBoardY), (y1+2)*boardUnit)
+            x = clip((x0-1)*boardUnit, snap(boardUnit)(startX + dPageX - dBoardX), (x1+1)*boardUnit)
+            y = clip((y0-1)*boardUnit, snap(boardUnit)(startY + dPageY - dBoardY), (y1+1)*boardUnit)
         }
         return html`<Tile
             state=${state}
@@ -143,7 +165,7 @@ return html`
                     $el.style.zIndex = "0"
                     boardState.swap(
                         [tile.col, tile.row],
-                        [Math.round(x / boardUnit)-1, Math.round(y / boardUnit)-1],
+                        [Math.round(x / boardUnit), Math.round(y / boardUnit)],
                     )
                     console.log(boardState.toBoxString())
                 }, { once: true })
@@ -153,11 +175,7 @@ return html`
 
                 while (moving || Math.hypot(x - renderedX, y - renderedY) > 0.01) {
                     await tick()
-                    $el.style.left = (renderedX += (x - renderedX) * 0.1) + "px"
-                    $el.style.top = (renderedY += (y - renderedY) * 0.1) + "px"
-                    $board.style.left = (boardRenderedX += (boardX - boardRenderedX) * 0.1) + "px"
-                    $board.style.top = (boardRenderedY += (boardY - boardRenderedY) * 0.1) + "px"
-                    $board.style.transform = `scale(${renderedScale += (scale - renderedScale) * 0.1})`
+                    render($el, $board)
                 }
             }}
         />`
