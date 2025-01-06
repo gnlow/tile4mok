@@ -1,6 +1,10 @@
 type State = 0 | 1
 type Vec2 = [number, number]
 
+const getKey = ({ col, row }: { col: number, row: number }) => {
+    return col + "," + row
+}
+
 export class Tile {
     state
     col
@@ -11,7 +15,7 @@ export class Tile {
         this.row = row
     }
     get key() {
-        return this.col + "," + this.row
+        return getKey(this)
     }
     clone() {
         return new Tile(this.state, [this.col, this.row])
@@ -23,7 +27,9 @@ export interface Dimension {
     row: Vec2
 }
 
-export class BoardState {
+interface Tiley { col: number, row: number }
+
+class BoardProto<Tile extends Tiley> {
     readonly tiles
     private map = new Map<string, Tile>
 
@@ -72,12 +78,12 @@ export class BoardState {
     }
 
     delete(tile: Tile) {
-        this.map.delete(tile.key)
+        this.map.delete(getKey(tile))
         this._dimension = undefined
         return this
     }
-    private put(tile: Tile) {
-        this.map.set(tile.key, tile)
+    put(tile: Tile) {
+        this.map.set(getKey(tile), tile)
         this._dimension = undefined
     }
 
@@ -89,14 +95,59 @@ export class BoardState {
         this.put(tile)
         return this
     }
-
     clone() {
+        return new BoardProto(
+            this.tiles.map(tile => structuredClone(tile))
+        )
+    }
+}
+
+export class BoardState extends BoardProto<Tile> {
+    isBridge(x0: number, y0: number) {
+        const d = [[0,-1],[1,0],[0,1],[-1,0]]
+
+        const flood = (x1: number, y1: number) => {
+            console.log("flood", x1, y1)
+            const out = []
+            const q = [this.at(x1, y1)]
+            const sketchBook = new BoardProto<Tiley>([])
+            sketchBook.put({ col: x0, row: y0 })
+            while (q.length) {
+                const now = q.pop()
+                if (!now) return []
+                x1 = now.col
+                y1 = now.row
+                
+                console.log("flood>>", now, q.length)
+                
+                out.push(now)
+
+                ;q.push(...d
+                    .map(([x, y]) => {
+                        const tile = this.at(x1+x, y1+y)
+                        if (sketchBook.at(x1+x, y1+y)) {
+                            console.log("cut", x1+x, y1+y)
+                            return
+                        } else {
+                            sketchBook.put({ col: x1+x, row: y1+y })
+                            console.log("put", x1+x, y1+y)
+                            return tile
+                        }
+                    })
+                    .filter(t => t)
+                )
+            }
+            return out
+        }
+        return d.map(([x, y]) => flood(x0+x, y0+y))
+    }
+
+    override clone() {
         return new BoardState(
             this.tiles.map(tile => tile.clone())
         )
     }
-
-    toString() {
+    override toString() {
         return Array.from({ length: this.height }, (_, rowI) =>
             Array.from({ length: this.width }, (_, colI) =>
                 this.iat(colI, rowI)?.state ?? " "
