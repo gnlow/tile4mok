@@ -113,8 +113,8 @@ return html`
             $el.style.top = (renderedY += (y - renderedY) * 0.1) + "px"
             
             $board.style.transform = `scale(${renderedScale += (scale - renderedScale) * 0.1})`
-            $board.style.left = (boardRenderedX += (boardX - boardRenderedX) * 0.1) * scale + "px"
-            $board.style.top = (boardRenderedY += (boardY - boardRenderedY) * 0.1) * scale + "px"
+            $board.style.left = (boardRenderedX += (boardX - boardRenderedX) * 0.1) * renderedScale + "px"
+            $board.style.top = (boardRenderedY += (boardY - boardRenderedY) * 0.1) * renderedScale + "px"
         }
         addEventListener("DOMContentLoaded", () => {
             render(
