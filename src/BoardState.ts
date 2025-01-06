@@ -103,7 +103,7 @@ class BoardProto<Tile extends Tiley> {
 }
 
 export class BoardState extends BoardProto<Tile> {
-    isBridge(x0: number, y0: number) {
+    cutted(x0: number, y0: number) {
         const d = [[0,-1],[1,0],[0,1],[-1,0]]
 
         const flood = (x1: number, y1: number) => {
@@ -112,6 +112,7 @@ export class BoardState extends BoardProto<Tile> {
             const q = [this.at(x1, y1)]
             const sketchBook = new BoardProto<Tiley>([])
             sketchBook.put({ col: x0, row: y0 })
+            sketchBook.put({ col: x1, row: y1 })
             while (q.length) {
                 const now = q.pop()
                 if (!now) return []
