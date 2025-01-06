@@ -33,6 +33,10 @@ const updateScale = (boardState: BoardState) => {
     ) / boardUnit
 }
 addEventListener("DOMContentLoaded", () => updateScale(boardState))
+addEventListener("resize", async () => {
+    await tick()
+    updateScale(boardState)
+})
 
 return html`
 <style>
@@ -117,6 +121,13 @@ return html`
             $board.style.top = (boardRenderedY += (boardY - boardRenderedY) * 0.1) * renderedScale + "px"
         }
         addEventListener("DOMContentLoaded", () => {
+            render(
+                $root.querySelector(`tile:nth-child(${i+1})`)!,
+                $root.querySelector("boardin")!,
+            )
+        })
+        addEventListener("resize", async () => {
+            await tick()
             render(
                 $root.querySelector(`tile:nth-child(${i+1})`)!,
                 $root.querySelector("boardin")!,
