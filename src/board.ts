@@ -186,7 +186,7 @@ return html`
                         [Math.round(x / boardUnit), Math.round(y / boardUnit)],
                     )
                     console.log(boardState.toBoxString())
-                    console.log(boardState.cutted(Math.round(x / boardUnit), Math.round(y / boardUnit)))
+                    console.log(boardState.getCandids(Math.round(x / boardUnit), Math.round(y / boardUnit)))
                 }, { once: true })
                 moving = true
 

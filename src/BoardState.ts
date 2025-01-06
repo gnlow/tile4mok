@@ -4,6 +4,10 @@ type Vec2 = [number, number]
 const getKey = ({ col, row }: { col: number, row: number }) => {
     return col + "," + row
 }
+const unKey = (str: string): Tiley => {
+    const [ col, row ] = str.split(",").map(Number)
+    return { col, row }
+}
 
 export class Tile {
     state
@@ -102,9 +106,10 @@ class BoardProto<Tile extends Tiley> {
     }
 }
 
+const d = [[0,-1],[1,0],[0,1],[-1,0]]
+
 export class BoardState extends BoardProto<Tile> {
-    cutted(x0: number, y0: number) {
-        const d = [[0,-1],[1,0],[0,1],[-1,0]]
+    cut(x0: number, y0: number) {
 
         const flood = (x1: number, y1: number) => {
             console.log("flood", x1, y1)
@@ -123,7 +128,7 @@ export class BoardState extends BoardProto<Tile> {
                 
                 out.push(now)
 
-                ;q.push(...d
+                q.push(...d
                     .map(([x, y]) => {
                         const tile = this.at(x1+x, y1+y)
                         if (sketchBook.at(x1+x, y1+y)) {
@@ -140,7 +145,24 @@ export class BoardState extends BoardProto<Tile> {
             }
             return out
         }
-        return d.map(([x, y]) => flood(x0+x, y0+y))
+        
+        return d
+            .map(([x, y]) => flood(x0+x, y0+y))
+            .filter(l => l.length)
+    }
+    getCandids(x0: number, y0: number) {
+        const res = this.cut(x0, y0)
+            .map(l => {
+                const base = new Set(l.map(getKey))
+                const offset = new Set(l.flatMap(t =>
+                    d.map(([x, y]) => (getKey({ col: t.col+x, row: t.row+y })))
+                ))
+                return offset.difference(base)
+            })
+            .reduce((a, b) => a.intersection(b))
+        res.delete(getKey({ col: x0, row: y0 }))
+        return [...res]
+            .map(unKey)
     }
 
     override clone() {
