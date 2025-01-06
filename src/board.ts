@@ -22,7 +22,7 @@ const boardUnit = 140
 let scale = 1
 let renderedScale = scale
 
-const updateScale = () => {
+const updateScale = (boardState: BoardState) => {
     const $boardOut = $root.querySelector("BoardOut")! as HTMLElement
     const boardWidth = $boardOut.clientWidth
     const boardHeight = $boardOut.clientHeight
@@ -32,7 +32,7 @@ const updateScale = () => {
         boardHeight/(boardState.height+2),
     ) / boardUnit
 }
-addEventListener("DOMContentLoaded", updateScale)
+addEventListener("DOMContentLoaded", () => updateScale(boardState))
 
 return html`
 <style>
@@ -129,10 +129,17 @@ return html`
             const [x0, x1] = boardState.dimension.col
             const [y0, y1] = boardState.dimension.row
 
-            updateScale()
+            const tempState = boardState.clone().swap(
+                [tile.col, tile.row],
+                [Math.round(x / boardUnit), Math.round(y / boardUnit)],
+            )
+            const [nx0, nx1] = tempState.dimension.col
+            const [ny0, ny1] = tempState.dimension.row
 
-            boardX = snap(boardUnit/2)(stair(x0-1, x0, x1, x1+1)(x/boardUnit)*boardUnit * -0.5) - ((x0+x1)/2 - 1.5)*boardUnit
-            boardY = snap(boardUnit/2)(stair(y0-1, y0, y1, y1+1)(y/boardUnit)*boardUnit * -0.5) - ((y0+y1)/2 - 1.5)*boardUnit
+            updateScale(tempState)
+
+            boardX = snap(boardUnit/2)(stair(x0-1, nx0, nx1, x1+1)(x/boardUnit)*boardUnit * -0.5) - ((nx0+nx1)/2 - 1.5)*boardUnit
+            boardY = snap(boardUnit/2)(stair(y0-1, ny0, ny1, y1+1)(y/boardUnit)*boardUnit * -0.5) - ((ny0+ny1)/2 - 1.5)*boardUnit
 
             const dBoardX = boardX - boardStartX
             const dBoardY = boardY - boardStartY

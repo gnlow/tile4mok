@@ -13,6 +13,9 @@ export class Tile {
     get key() {
         return this.col + "," + this.row
     }
+    clone() {
+        return new Tile(this.state, [this.col, this.row])
+    }
 }
 
 export interface Dimension {
@@ -21,19 +24,14 @@ export interface Dimension {
 }
 
 export class BoardState {
-    readonly tiles: Tile[] = []
-    private map: Map<string, Tile> = new Map
+    readonly tiles
+    private map = new Map<string, Tile>
 
-    constructor(data: (State | undefined)[][]) {
-        data.forEach((items, row) =>
-            items.forEach((state, col) => {
-                if (state != undefined) {
-                    const tile = new Tile(state, [col, row])
-                    this.tiles.push(tile)
-                    this.put(tile)
-                }
-            })
-        )
+    constructor(
+        tiles: Tile[]
+    ) {
+        this.tiles = tiles
+        this.tiles.forEach(tile => this.put(tile))
     }
 
     private _dimension?: Dimension
@@ -73,6 +71,11 @@ export class BoardState {
         )
     }
 
+    delete(tile: Tile) {
+        this.map.delete(tile.key)
+        this._dimension = undefined
+        return this
+    }
     private put(tile: Tile) {
         this.map.set(tile.key, tile)
         this._dimension = undefined
@@ -80,10 +83,17 @@ export class BoardState {
 
     swap([ax, ay]: Vec2, [bx, by]: Vec2) {
         const tile = this.at(ax, ay)!
-        this.map.delete(tile.key)
+        this.delete(tile)
         tile.col = bx
         tile.row = by
         this.put(tile)
+        return this
+    }
+
+    clone() {
+        return new BoardState(
+            this.tiles.map(tile => tile.clone())
+        )
     }
 
     toString() {
@@ -98,8 +108,20 @@ export class BoardState {
             .replaceAll("0", "■")
             .replaceAll("1", "□")
     }
+    static fromTable(data: (State | undefined)[][]) {
+        const tiles: Tile[] = []
+        data.forEach((items, row) =>
+            items.forEach((state, col) => {
+                if (state != undefined) {
+                    const tile = new Tile(state, [col, row])
+                    tiles.push(tile)
+                }
+            })
+        )
+        return new BoardState(tiles)
+    }
     static fromString(str: string) {
-        return new BoardState(str
+        return BoardState.fromTable(str
             .trim()
             .split("\n")
             .map(line => line
