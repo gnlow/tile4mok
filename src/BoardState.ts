@@ -31,7 +31,7 @@ export interface Dimension {
     row: Vec2
 }
 
-interface Tiley { col: number, row: number }
+export interface Tiley { col: number, row: number }
 
 class BoardProto<Tile extends Tiley> {
     readonly tiles
@@ -155,7 +155,7 @@ export class BoardState extends BoardProto<Tile> {
                 return offset.difference(base)
             })
             .reduce((a, b) => a.intersection(b))
-        res.delete(getKey({ col: x0, row: y0 }))
+        // res.delete(getKey({ col: x0, row: y0 }))
         return [...res]
             .map(unKey)
     }

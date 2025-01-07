@@ -1,7 +1,7 @@
 import { html } from "./deps.ts"
 import { $root } from "./index.ts"
 import { tick } from "./util.ts"
-import { BoardState } from "./BoardState.ts"
+import { BoardState, Tiley } from "./BoardState.ts"
 
 export const Board = () => {
 
@@ -37,6 +37,15 @@ addEventListener("resize", async () => {
     await tick()
     updateScale(boardState)
 })
+
+const getClosestCandid =
+(candids: Tiley[]) =>
+(x: number, y: number): Tiley => {
+    return candids
+        .map(({ col, row }) => ({ col, row, len: Math.hypot(col-x, row-y)}))
+        .toSorted((a, b) => a.len - b.len)
+        [0] || { col: x, row: y }
+}
 
 return html`
 <style>
@@ -95,6 +104,7 @@ return html`
         let renderedX = x
         let renderedY = y
         let moving = false
+        let candids: Tiley[] = []
 
         const clip =
         (a: number, b: number, c: number) =>
@@ -154,8 +164,14 @@ return html`
 
             const dBoardX = boardX - boardStartX
             const dBoardY = boardY - boardStartY
-            x = clip((x0-1)*boardUnit, snap(boardUnit)(startX + dPageX - dBoardX), (x1+1)*boardUnit)
-            y = clip((y0-1)*boardUnit, snap(boardUnit)(startY + dPageY - dBoardY), (y1+1)*boardUnit)
+
+            const closest = getClosestCandid(candids)(
+                (startX + dPageX - dBoardX) / boardUnit,
+                (startY + dPageY - dBoardY) / boardUnit,
+            )
+
+            x = closest.col * boardUnit
+            y = closest.row * boardUnit
         }
         return html`<Tile
             state=${state}
@@ -175,6 +191,7 @@ return html`
                 startY = y
                 boardStartX = boardX
                 boardStartY = boardY
+                candids = boardState.getCandids(tile.col, tile.row)
                 $root.addEventListener("mousemove", onMove)
                 $root.addEventListener("mouseup", () => {
                     console.log("mouseup", x, y)
