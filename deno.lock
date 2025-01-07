@@ -1,7 +1,0 @@
-{
-  "version": "4",
-  "remote": {
-    "https://esm.sh/lit-html@3.2.1": "96817238b1fb9b13a6ff78a1d6e50c372a9779d2543bc6cc6c91b5afcbd0c83d",
-    "https://esm.sh/v135/lit-html@3.2.1/denonext/lit-html.mjs": "6d58084117c156720f0c0e0bcb73dab8e9e404b181bc005cb943eff5bd5b3419"
-  }
-}
