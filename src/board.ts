@@ -115,20 +115,6 @@ return html`
         let moving = false
         let candids: Tiley[] = []
 
-        const clip =
-        (a: number, b: number, c: number) =>
-            Math.max(a, Math.min(b, c))
-
-        const stair =
-        (a: number, b: number, c: number, d: number) =>
-        (n: number) =>
-            clip(a-b, clip(n-c, 0, n-b), d-c)
-        
-        const snap =
-        (step: number) =>
-        (n: number) =>
-            Math.round(n / step) * step
-
         let $el: HTMLElement
 
         const render = ($el: HTMLElement, $board: HTMLElement) => {
@@ -156,8 +142,6 @@ return html`
             if (!(e instanceof MouseEvent)) { throw 0 }
             const dPageX = (e.pageX - startPageX) / scale
             const dPageY = (e.pageY - startPageY) / scale
-            const [x0, x1] = boardState.dimension.col
-            const [y0, y1] = boardState.dimension.row
 
             const tempState = boardState.clone().swap(
                 [tile.col, tile.row],
@@ -168,8 +152,8 @@ return html`
 
             updateScale(tempState)
 
-            boardX = snap(boardUnit/2)(stair(x0-1, nx0, nx1, x1+1)(x/boardUnit)*boardUnit * -0.5) - ((nx0+nx1)/2 - 1.5)*boardUnit
-            boardY = snap(boardUnit/2)(stair(y0-1, ny0, ny1, y1+1)(y/boardUnit)*boardUnit * -0.5) - ((ny0+ny1)/2 - 1.5)*boardUnit
+            boardX = -((nx0+nx1)/2 - 1.5)*boardUnit
+            boardY = -((ny0+ny1)/2 - 1.5)*boardUnit
 
             const dBoardX = boardX - boardStartX
             const dBoardY = boardY - boardStartY
