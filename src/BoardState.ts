@@ -112,7 +112,6 @@ export class BoardState extends BoardProto<Tile> {
     cut(x0: number, y0: number) {
 
         const flood = (x1: number, y1: number) => {
-            console.log("flood", x1, y1)
             const out = []
             const q = [this.at(x1, y1)]
             const sketchBook = new BoardProto<Tiley>([])
@@ -124,19 +123,15 @@ export class BoardState extends BoardProto<Tile> {
                 x1 = now.col
                 y1 = now.row
                 
-                console.log("flood>>", now, q.length)
-                
                 out.push(now)
 
                 q.push(...d
                     .map(([x, y]) => {
                         const tile = this.at(x1+x, y1+y)
                         if (sketchBook.at(x1+x, y1+y)) {
-                            console.log("cut", x1+x, y1+y)
                             return
                         } else {
                             sketchBook.put({ col: x1+x, row: y1+y })
-                            console.log("put", x1+x, y1+y)
                             return tile
                         }
                     })
