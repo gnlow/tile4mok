@@ -1,4 +1,4 @@
-import { html } from "./deps.ts"
+import { html, render as litRender, map } from "./deps.ts"
 import { $root } from "./index.ts"
 import { tick } from "./util.ts"
 import { BoardState, Tiley } from "./BoardState.ts"
@@ -70,21 +70,30 @@ return html`
 
         border-radius: 11px;
     }
-    Tile {
+    Tile, Circle {
         display: block;
         position: absolute;
-        width: 135px;
-        height: 135px;
         aspect-ratio: 1;
-
+    }
+    Tile {
+        width: 135px;
         border-radius: 8px;
     }
-    Tile[state="0"] {
+    Circle {
+        width: 30px;
+        border-radius: 15px;
+        z-index: -1;
+    }
+    Circle[isOrigin="true"] {
+        border-radius: 0;
+        transform: rotate(45deg) scale(0.85);
+    }
+    :is(Tile, Circle)[state="0"] {
         background: var(--black);
         
         color: var(--white);
     }
-    Tile[state="1"] {
+    :is(Tile, Circle)[state="1"] {
         background: var(--white);
         border: 5px solid var(--black);
 
@@ -192,9 +201,22 @@ return html`
                 boardStartX = boardX
                 boardStartY = boardY
                 candids = boardState.getCandids(tile.col, tile.row)
+                litRender(html`
+                    ${map(candids, ({ col, row }) => html`
+                        <Circle
+                            state=${tile.state}
+                            isOrigin=${tile.col == col && tile.row == row}
+                            style="
+                                left: ${ (col + 0.5) * boardUnit - 15 }px;
+                                top:  ${ (row + 0.5) * boardUnit - 15 }px;
+                            "
+                        />
+                    `)}
+                `, $board)
                 $root.addEventListener("mousemove", onMove)
                 $root.addEventListener("mouseup", () => {
                     console.log("mouseup", x, y)
+                    litRender(html``, $board)
                     $root.removeEventListener("mousemove", onMove)
                     moving = false
                     $el.style.zIndex = "0"
