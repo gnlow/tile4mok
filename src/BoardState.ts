@@ -141,12 +141,20 @@ export class BoardState extends BoardProto<Tile> {
             return out
         }
         
-        return d
+        const res = d
             .map(([x, y]) => flood(x0+x, y0+y))
-            .filter(l => l.length)
+        const l = res.map(l => l.length)
+        if ((l[0]&&l[2]) || (l[1]&&l[3])) {
+            return null
+        }
+        return res.filter(l => l.length)
     }
     getCandids(x0: number, y0: number) {
-        const res = this.cut(x0, y0)
+        const cut = this.cut(x0, y0)
+        if (cut == null) {
+            return [{ col: x0, row: y0 }]
+        }
+        const res = cut
             .map(l => {
                 const base = new Set(l.map(getKey))
                 const offset = new Set(l.flatMap(t =>
