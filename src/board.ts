@@ -197,11 +197,11 @@ return html`
                         />
                     `)}
                 `, $board)
-                $root.addEventListener("mousemove", onMove)
+                addEventListener("mousemove", onMove)
                 $root.addEventListener("mouseup", () => {
                     console.log("mouseup", x, y)
                     litRender(html``, $board)
-                    $root.removeEventListener("mousemove", onMove)
+                    removeEventListener("mousemove", onMove)
                     moving = false
                     $el.style.zIndex = "0"
                     boardState.swap(

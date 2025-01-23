@@ -1,5 +1,6 @@
 import { html, render } from "./deps.ts"
 import { Board } from "./board.ts"
+import { draggable, motion } from "./directive/mod.ts"
 
 const app = document.querySelector("body")!
 export const $root = app.attachShadow({ mode: "open" })
@@ -29,4 +30,9 @@ render(html`
     </style>
     <h1>Drag Demo</h1>
     ${Board()}
+    <div
+        style="position: relative;"
+        ${draggable()}
+        ${motion()}
+    >Hi</div>
 `, $root)
